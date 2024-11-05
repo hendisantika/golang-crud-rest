@@ -125,3 +125,27 @@ func (cc *ContactController) GetAllContacts(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Successfully retrieved all contacts", "size": len(contacts), "contacts": contacts})
 }
+
+// Deleting contact handlers
+func (cc *ContactController) DeleteContactById(ctx *gin.Context) {
+	contactId := ctx.Param("contactId")
+
+	_, err := cc.db.GetContactById(ctx, uuid.MustParse(contactId))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": "Failed to retrieve contact with this ID"})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "Failed retrieving contact", "error": err.Error()})
+		return
+	}
+
+	err = cc.db.DeleteContact(ctx, uuid.MustParse(contactId))
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "failed", "error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, gin.H{"status": "successfuly deleted"})
+
+}
