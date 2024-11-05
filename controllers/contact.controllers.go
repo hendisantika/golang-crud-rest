@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	db "golang-crud-rest/db/sqlc"
 	"golang-crud-rest/schemas"
 	"net/http"
 	"strconv"
