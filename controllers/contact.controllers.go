@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang-crud-rest/schemas"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -96,4 +97,31 @@ func (cc *ContactController) GetContactById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Successfully retrived id", "contact": contact})
+}
+
+// Retrieve all records handlers
+func (cc *ContactController) GetAllContacts(ctx *gin.Context) {
+	var page = ctx.DefaultQuery("page", "1")
+	var limit = ctx.DefaultQuery("limit", "10")
+
+	reqPageID, _ := strconv.Atoi(page)
+	reqLimit, _ := strconv.Atoi(limit)
+	offset := (reqPageID - 1) * reqLimit
+
+	args := &db.ListContactsParams{
+		Limit:  int32(reqLimit),
+		Offset: int32(offset),
+	}
+
+	contacts, err := cc.db.ListContacts(ctx, *args)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "Failed to retrieve contacts", "error": err.Error()})
+		return
+	}
+
+	if contacts == nil {
+		contacts = []db.Contact{}
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "Successfully retrieved all contacts", "size": len(contacts), "contacts": contacts})
 }
