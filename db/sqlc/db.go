@@ -78,3 +78,14 @@ func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args .
 		return q.db.ExecContext(ctx, query, args...)
 	}
 }
+
+func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
+	switch {
+	case stmt != nil && q.tx != nil:
+		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
+	case stmt != nil:
+		return stmt.QueryContext(ctx, args...)
+	default:
+		return q.db.QueryContext(ctx, query, args...)
+	}
+}
