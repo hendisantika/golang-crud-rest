@@ -1,25 +1,67 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"golang-crud-rest/controllers"
+	routes "golang-crud-rest/route"
+	"golang-crud-rest/util"
+	"log"
+	"net/http"
 )
 
-//TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
+var (
+	server *gin.Engine
+	db     *dbCon.Queries
+	ctx    context.Context
 
-func main() {
-	//TIP Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined or highlighted text
-	// to see how GoLand suggests fixing it.
-	s := "gopher"
-	fmt.Println("Hello and welcome, %s!", s)
+	ContactController controllers.ContactController
+	ContactRoutes     routes.ContactRoutes
+)
 
-	for i := 1; i <= 5; i++ {
-		//TIP You can try debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>. To start your debugging session,
-		// right-click your code in the editor and select the <b>Debug</b> option.
-		fmt.Println("i =", 100/i)
+func init() {
+	ctx = context.TODO()
+	config, err := util.LoadConfig(".")
+
+	if err != nil {
+		log.Fatalf("could not loadconfig: %v", err)
 	}
+
+	conn, err := sql.Open(config.DbDriver, config.DbSource)
+	if err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
+	}
+
+	db = dbCon.New(conn)
+
+	fmt.Println("PostgreSql connected successfully...")
+
+	ContactController = *controllers.NewContactController(db, ctx)
+	ContactRoutes = routes.NewRouteContact(ContactController)
+
+	server = gin.Default()
 }
 
-//TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
-// Also, you can try interactive lessons for GoLand by selecting 'Help | Learn IDE Features' from the main menu.
+func main() {
+	config, err := util.LoadConfig(".")
+
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	router := server.Group("/api")
+
+	router.GET("/healthcheck", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"message": "The contact APi is working fine"})
+	})
+
+	ContactRoutes.ContactRoute(router)
+
+	server.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": fmt.Sprintf("The specified route %s not found", ctx.Request.URL)})
+	})
+
+	log.Fatal(server.Run(":" + config.ServerAddress))
+}
