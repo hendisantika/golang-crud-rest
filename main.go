@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang-crud-rest/controllers"
+	dbCon "golang-crud-rest/db/sqlc"
 	routes "golang-crud-rest/route"
 	"golang-crud-rest/util"
 	"log"
