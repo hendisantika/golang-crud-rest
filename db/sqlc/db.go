@@ -110,3 +110,15 @@ type Queries struct {
 	listContactsStmt   *sql.Stmt
 	updateContactStmt  *sql.Stmt
 }
+
+func (q *Queries) WithTx(tx *sql.Tx) *Queries {
+	return &Queries{
+		db:                 tx,
+		tx:                 tx,
+		createContactStmt:  q.createContactStmt,
+		deleteContactStmt:  q.deleteContactStmt,
+		getContactByIdStmt: q.getContactByIdStmt,
+		listContactsStmt:   q.listContactsStmt,
+		updateContactStmt:  q.updateContactStmt,
+	}
+}
