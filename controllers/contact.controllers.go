@@ -80,3 +80,20 @@ func (cc *ContactController) UpdateContact(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "successfully updated contact", "contact": contact})
 }
+
+// Get a single handler
+func (cc *ContactController) GetContactById(ctx *gin.Context) {
+	contactId := ctx.Param("contactId")
+
+	contact, err := cc.db.GetContactById(ctx, uuid.MustParse(contactId))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": "Failed to retrieve contact with this ID"})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "Failed retrieving contact", "error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "Successfully retrived id", "contact": contact})
+}
