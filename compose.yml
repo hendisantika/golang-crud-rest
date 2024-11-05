@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:17-alpine3.20
+    container_name: postgres17
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    env_file:
+      - ./app.env
+
+volumes:
+  postgresql_data:
