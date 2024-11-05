@@ -37,3 +37,33 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	return &q, nil
 }
+
+func (q *Queries) Close() error {
+	var err error
+	if q.createContactStmt != nil {
+		if cerr := q.createContactStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createContactStmt: %w", cerr)
+		}
+	}
+	if q.deleteContactStmt != nil {
+		if cerr := q.deleteContactStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteContactStmt: %w", cerr)
+		}
+	}
+	if q.getContactByIdStmt != nil {
+		if cerr := q.getContactByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getContactByIdStmt: %w", cerr)
+		}
+	}
+	if q.listContactsStmt != nil {
+		if cerr := q.listContactsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listContactsStmt: %w", cerr)
+		}
+	}
+	if q.updateContactStmt != nil {
+		if cerr := q.updateContactStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateContactStmt: %w", cerr)
+		}
+	}
+	return err
+}
