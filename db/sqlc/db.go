@@ -100,3 +100,13 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 		return q.db.QueryRowContext(ctx, query, args...)
 	}
 }
+
+type Queries struct {
+	db                 DBTX
+	tx                 *sql.Tx
+	createContactStmt  *sql.Stmt
+	deleteContactStmt  *sql.Stmt
+	getContactByIdStmt *sql.Stmt
+	listContactsStmt   *sql.Stmt
+	updateContactStmt  *sql.Stmt
+}
